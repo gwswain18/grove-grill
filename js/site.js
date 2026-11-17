@@ -13,6 +13,11 @@
     });
   };
 
+  // Things to switch off before one page's content is swapped for another's (timers, observers).
+  var teardowns = [];
+  // Set by music(): refreshes the music buttons after a page swap.
+  var musicPaint = null;
+
   /* ---------- Hours ---------- */
 
   function toMinutes(hhmm) {
@@ -79,10 +84,8 @@
   ];
 
   function buildChrome() {
-    var page = location.pathname.split("/").pop() || "index.html";
     var navLinks = NAV.map(function (n) {
-      var current = n.page === page ? ' aria-current="page"' : "";
-      return '<a href="' + n.href + '"' + current + ">" + n.text + "</a>";
+      return '<a href="' + n.href + '">' + n.text + "</a>";
     }).join("");
 
     var header =
@@ -438,6 +441,7 @@
       tick();
     });
 
+    musicPaint = paint;
     paint();
     if (wanted()) start();
   }
@@ -541,8 +545,14 @@
       toggle.addEventListener("click", function () { setPaused(!paused); });
     }
     // Hold the slideshow while the page is in a background tab.
-    document.addEventListener("visibilitychange", function () {
+    var onVisibility = function () {
       if (document.hidden) clearTimeout(timer); else schedule();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    teardowns.push(function () {
+      still = true;
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
     });
 
     show(0);
@@ -644,15 +654,40 @@
     });
 
     // The forms are a working demo only: nothing is sent anywhere until a form service is connected.
-    $$("[data-demo-form]").forEach(function (form) {
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
-        if (!form.checkValidity()) { form.reportValidity(); return; }
-        form.classList.add("is-sent");
-        var done = $(".form__done", form);
-        if (done) { done.setAttribute("tabindex", "-1"); done.focus(); }
-      });
+    document.addEventListener("submit", function (e) {
+      var form = e.target.closest && e.target.closest("[data-demo-form]");
+      if (!form) return;
+      e.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      form.classList.add("is-sent");
+      var done = $(".form__done", form);
+      if (done) { done.setAttribute("tabindex", "-1"); done.focus(); }
     });
+  }
+
+  /* ---------- Each page's own content ---------- */
+
+  // "/grove-grill/" and "/grove-grill/index.html" are the same page.
+  function pageKey(url) { return url.pathname.replace(/index\.html$/, ""); }
+  var shownPage = pageKey(location);
+
+  function markCurrent() {
+    $$("#site-nav a, .footer__col a").forEach(function (a) {
+      var u = new URL(a.href, location.href);
+      if (u.origin === location.origin && !u.hash && pageKey(u) === shownPage) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    });
+  }
+
+  // Runs on first load and again every time another page's content is swapped in.
+  function initPage() {
+    fillFacts();
+    renderHome();
+    renderEvents();
+    heroSlideshow();
+    renderMenu();
+    markCurrent();
+    if (musicPaint) musicPaint();
 
     var items = $$(".reveal");
     if ("IntersectionObserver" in window) {
@@ -660,17 +695,113 @@
         entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); } });
       }, { rootMargin: "0px 0px -8% 0px" });
       items.forEach(function (el) { io.observe(el); });
+      teardowns.push(function () { io.disconnect(); });
     } else {
       items.forEach(function (el) { el.classList.add("is-in"); });
     }
   }
 
+  /* ---------- Moving between pages without reloading ----------
+     A normal link loads a brand new page, which cuts the song off (and phones then keep it
+     silent until the next tap). Instead, links to our own pages fetch the next page and swap
+     its content in, so the header, the footer and the music carry on untouched.            */
+
+  var pageCache = {};
+
+  function fetchPage(url) {
+    var key = pageKey(url);
+    if (!pageCache[key]) {
+      pageCache[key] = fetch(url.pathname, { credentials: "same-origin" }).then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.text();
+      });
+      pageCache[key].catch(function () { delete pageCache[key]; });
+    }
+    return pageCache[key];
+  }
+
+  // glide = true scrolls smoothly (same page); false jumps straight there (a new page).
+  function scrollToPlace(hash, glide) {
+    var how = glide ? "smooth" : "instant";
+    var target = null;
+    if (hash && hash.length > 1) {
+      try { target = document.getElementById(decodeURIComponent(hash.slice(1))); } catch (e) { target = null; }
+    }
+    try {
+      if (target) target.scrollIntoView({ behavior: how, block: "start" });
+      else window.scrollTo({ top: 0, left: 0, behavior: how });
+    } catch (e) {
+      if (target) target.scrollIntoView(); else window.scrollTo(0, 0);
+    }
+  }
+
+  function goTo(url, addToHistory) {
+    $$("dialog[open]").forEach(function (d) { d.close(); });
+
+    // Same page: only the place on the page changes.
+    if (pageKey(url) === shownPage) {
+      if (addToHistory && url.href !== location.href) history.pushState(null, "", url.href);
+      scrollToPlace(url.hash, true);
+      return;
+    }
+
+    fetchPage(url).then(function (html) {
+      var next = new DOMParser().parseFromString(html, "text/html");
+      var incoming = next.querySelector("main");
+      var main = $("main");
+      if (!incoming || !main) throw new Error("no page content");
+
+      teardowns.forEach(function (stop) { stop(); });
+      teardowns = [];
+
+      main.innerHTML = incoming.innerHTML;
+      document.title = next.title;
+      var desc = next.querySelector('meta[name="description"]');
+      var mine = $('meta[name="description"]');
+      if (desc && mine) mine.setAttribute("content", desc.getAttribute("content"));
+
+      if (addToHistory) history.pushState(null, "", url.href);
+      shownPage = pageKey(url);
+      initPage();
+      scrollToPlace(url.hash, false);
+    }).catch(function () {
+      // If the swap fails for any reason, fall back to an ordinary page load.
+      location.href = url.href;
+    });
+  }
+
+  function router() {
+    if (!window.fetch || !window.DOMParser || !window.history || !history.pushState) return;
+
+    document.addEventListener("click", function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var a = e.target.closest && e.target.closest("a[href]");
+      if (!a || a.target === "_blank" || a.hasAttribute("download")) return;
+      var url = new URL(a.href, location.href);
+      if (url.origin !== location.origin) return;
+      if (!/(\/|\.html)$/.test(url.pathname)) return;
+      // A jump within the page we are already on: the browser handles that fine by itself.
+      if (url.hash && url.pathname === location.pathname && url.search === location.search) return;
+      e.preventDefault();
+      goTo(url, true);
+    });
+
+    // Back and forward buttons.
+    window.addEventListener("popstate", function () { goTo(new URL(location.href), false); });
+
+    // Fetch the other pages quietly in the background so switching is instant.
+    var warm = function () {
+      $$("#site-nav a").forEach(function (a) {
+        var u = new URL(a.href, location.href);
+        if (pageKey(u) !== shownPage) fetchPage(u).catch(function () {});
+      });
+    };
+    if (window.requestIdleCallback) requestIdleCallback(warm, { timeout: 4000 }); else setTimeout(warm, 2500);
+  }
+
   buildChrome();
-  fillFacts();
-  renderHome();
-  renderEvents();
-  heroSlideshow();
-  renderMenu();
   music();
   wireUp();
+  initPage();
+  router();
 })();
