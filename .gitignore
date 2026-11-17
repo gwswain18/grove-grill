@@ -1,0 +1,13 @@
+# Only the website itself is published. Working files stay on this computer.
+
+# Untouched source photos, including review screenshots that show customer names
+photos/
+
+# Photo touch-up script and internal notes
+tools/
+README.md
+
+# Local preview settings
+.claude/
+
+.DS_Store

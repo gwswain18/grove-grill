@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catering &amp; Private Parties | The Grove Grill &amp; Sports Bar</title>
+  <meta name="description" content="Ribs, wings, catfish and sides by the tray, private parties and watch parties at The Grove Grill & Sports Bar in Oak Grove, KY.">
+  <!-- Draft only: remove this line at launch so search engines can list the site. -->
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#17100a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Yellowtail&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="page-hero__media">
+        <img src="images/hero-ribs.jpg" alt="" width="1640" height="922">
+      </div>
+      <div class="wrap page-hero__content">
+        <p class="script">Feeding a crowd?</p>
+        <h1>Catering &amp; Private Parties</h1>
+        <p class="lede">Ribs, wings, catfish and sides by the tray. Or bring the whole party to us and let the kitchen do the work.</p>
+        <div class="cta-row">
+          <a class="btn btn--gold" href="#inquiry">Start an inquiry</a>
+          <a class="btn btn--ghost" data-phone-cta></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="holiday" aria-label="Holiday catering">
+      <div class="wrap holiday__row">
+        <div>
+          <p class="label" style="color:var(--cream-200)">Holiday catering</p>
+          <p class="holiday__title">Sides and trays for your family dinner</p>
+        </div>
+        <a class="btn btn--gold" href="#inquiry">Ask about the holidays</a>
+      </div>
+    </section>
+
+    <section class="section on-cream">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="script">Pick your play</p>
+          <h2 class="title">Three ways to feed the crew</h2>
+        </div>
+        <div class="ways reveal">
+          <article class="way">
+            <span class="way__num">1</span>
+            <h3>Pickup trays</h3>
+            <p>Order ahead and pick it up hot and ready to serve. Holiday dinners, office lunches, family reunions, tailgates and unit cookouts.</p>
+          </article>
+          <article class="way">
+            <span class="way__num">2</span>
+            <h3>Party at The Grove</h3>
+            <p>Birthdays, promotions, homecomings and team dinners. Tell us your headcount and we'll set the tables.</p>
+          </article>
+          <article class="way">
+            <span class="way__num">3</span>
+            <h3>Watch parties</h3>
+            <p>Claim a section for the big game. We handle the food, the drinks and the screens. You handle the trash talk.</p>
+          </article>
+        </div>
+        <div class="photo-strip reveal">
+          <img src="images/mac-trays.jpg" alt="Trays of baked macaroni and cheese" loading="lazy">
+          <img src="images/ribs-sliced.jpg" alt="Sliced ribs glazed with barbecue sauce" loading="lazy">
+          <img src="images/wings-fries-square.jpg" alt="Wings and seasoned fries" loading="lazy">
+          <img src="images/catfish-shrimp-rings.jpg" alt="Fried catfish, shrimp and onion rings" loading="lazy">
+        </div>
+      </div>
+    </section>
+
+    <section class="section wood" id="inquiry">
+      <div class="wrap inquiry">
+        <div class="inquiry__copy reveal">
+          <p class="script">Let's plan it</p>
+          <h2 class="title">Tell us about your event</h2>
+          <p class="lede">Send the basics and we'll call you back to sort out the menu and a quote.</p>
+          <div>
+            <p class="label" style="color:var(--gold-300);margin-bottom:10px">What travels well</p>
+            <ul class="tray-list">
+              <li>Ribs by the rack</li>
+              <li>Wings in six sauces</li>
+              <li>Fried catfish and shrimp</li>
+              <li>Pork steaks and chicken leg quarters</li>
+              <li>Collard greens, mac and cheese, baked beans, yellow rice, potato salad and coleslaw</li>
+            </ul>
+          </div>
+          <p>Rather talk it through? Call <a data-phone style="color:var(--gold-300);font-weight:600"></a>.</p>
+        </div>
+
+        <form class="form reveal" data-demo-form novalidate>
+          <div class="form__row">
+            <div class="field">
+              <label for="c-name">Your name</label>
+              <input id="c-name" name="name" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="c-phone">Phone</label>
+              <input id="c-phone" name="phone" type="tel" autocomplete="tel" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="c-email">Email</label>
+            <input id="c-email" name="email" type="email" autocomplete="email">
+          </div>
+          <div class="form__row">
+            <div class="field">
+              <label for="c-date">Event date</label>
+              <input id="c-date" name="date" type="date" required>
+            </div>
+            <div class="field">
+              <label for="c-guests">How many guests</label>
+              <input id="c-guests" name="guests" type="number" min="1" inputmode="numeric" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="c-type">What do you need</label>
+            <select id="c-type" name="type" required>
+              <option value="">Choose one</option>
+              <option>Pickup trays</option>
+              <option>Private party at The Grove</option>
+              <option>Watch party</option>
+              <option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="c-notes">Anything we should know</label>
+            <textarea id="c-notes" name="notes" placeholder="Favorite dishes, start time, the team you're rooting for"></textarea>
+          </div>
+          <button class="btn btn--red" type="submit">Send inquiry</button>
+          <p class="form__fine">Preview form. Inquiries are not being collected yet.</p>
+          <div class="form__done">
+            <strong>Got it. We'll be in touch.</strong>
+            <span>(Preview only: nothing was sent.)</span>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="data/site-data.js"></script>
+  <script src="js/site.js"></script>
+</body>
+</html>
