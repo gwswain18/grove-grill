@@ -1,0 +1,386 @@
+# Owner admin for The Grove's website (Pages CMS, https://app.pagescms.org).
+#
+# This file tells the admin which parts of the site the owner can edit and what each form looks
+# like. The content itself is in the content/ folder; the pages read it every time they load,
+# so a change saved in the admin shows on the site a minute or two later.
+#
+# Fields marked "hidden" are kept exactly as they are; they are set up by the web developer.
+
+media:
+  # Photos are saved in the repository under "input"; "output" is the path written into the
+  # content files. Uploads are shrunk automatically (.github/workflows/shrink-photos.yml).
+  - name: flyers
+    label: Event flyers and photos
+    input: images/events
+    output: /images/events
+    extensions: [jpg, jpeg, png, webp]
+    rename: safe
+  - name: guests
+    label: Wall of fame photos
+    input: images/visitors
+    output: /images/visitors
+    extensions: [jpg, jpeg, png, webp]
+    rename: safe
+
+content:
+  # ------------------------------------------------------------------ Food menu
+  - name: menu
+    label: Food menu and prices
+    type: file
+    path: content/menu.json
+    format: json
+    fields:
+      - name: sections
+        label: Menu sections
+        description: Open a section to change its items and prices. Drag to change the order.
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{title}"
+        fields:
+          - name: title
+            label: Section name
+            type: string
+            required: true
+          - name: note
+            label: Line under the section name (optional)
+            type: string
+          - name: items
+            label: Items
+            type: object
+            list:
+              collapsible:
+                collapsed: true
+                summary: "{name}  {price}"
+            fields:
+              - name: name
+                label: Item
+                type: string
+                required: true
+              - name: detail
+                label: Small print (optional)
+                description: "For example: with 2 sides"
+                type: string
+              - name: price
+                label: Price
+                description: "Numbers only, for example 14.99. Leave empty to show no price."
+                type: number
+                options:
+                  min: 0
+              - name: sub
+                label: Tuck under the item above
+                description: Turn on for a combo, size or add-on that belongs to the item above it.
+                type: boolean
+          - name: chipsLabel
+            label: Heading for the list of choices (optional)
+            description: "For example: Pick your sauce"
+            type: string
+          - name: chips
+            label: Choices (optional)
+            description: "Shown as a row of labels, for example the wing sauces."
+            type: string
+            list: true
+          - name: footnote
+            label: Small print at the bottom of the section (optional)
+            type: string
+          - name: plain
+            label: Also available, shown without a price (optional)
+            type: string
+            list: true
+          - name: id
+            type: string
+            hidden: true
+          - name: nav
+            type: string
+            hidden: true
+          - name: img
+            type: string
+            hidden: true
+          - name: imgAlt
+            type: string
+            hidden: true
+
+  # ------------------------------------------------------------------ Bar menu
+  - name: bar
+    label: Bar menu and prices
+    type: file
+    path: content/bar.json
+    format: json
+    fields:
+      - name: cocktailNote
+        label: Line at the top of the cocktail list (optional)
+        description: "For example: Mixed drinks $7 · top shelf $10."
+        type: string
+      - name: cocktails
+        label: Cocktails
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{name}  {price}"
+        fields:
+          - name: name
+            label: Drink
+            type: string
+            required: true
+          - name: tag
+            label: Small badge (optional)
+            description: "For example: House favorite"
+            type: string
+          - name: price
+            label: Price
+            description: "Numbers only, for example 10. Leave empty to show no price."
+            type: number
+            options:
+              min: 0
+          - name: detail
+            label: What is in it
+            type: text
+      - name: beer
+        label: Beer and seltzers
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{name}  {price}"
+        fields:
+          - name: name
+            label: Beer (or several at the same price)
+            type: string
+            required: true
+          - name: detail
+            label: Small print (optional)
+            type: string
+          - name: price
+            label: Price
+            type: number
+            options:
+              min: 0
+      - name: cocktailImg
+        type: string
+        hidden: true
+      - name: cocktailImgAlt
+        type: string
+        hidden: true
+
+  # ------------------------------------------------------------------ Home page favorites
+  - name: favorites
+    label: Home page favorites
+    type: file
+    path: content/favorites.json
+    format: json
+    fields:
+      - name: favorites
+        label: Crowd favorites
+        description: The first one gets the big card. These prices are typed separately from the menu, so change them here too.
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{name}"
+        fields:
+          - name: name
+            label: Dish
+            type: string
+            required: true
+          - name: blurb
+            label: Description
+            type: text
+          - name: price
+            label: Price line
+            description: "Shown exactly as typed, for example: 5 for $9.99 · 10 for $15.99"
+            type: string
+          - name: mentions
+            label: Times named in Google reviews (optional)
+            type: number
+            options:
+              min: 0
+          - name: tag
+            label: Small badge (optional)
+            description: "For example: House sauce"
+            type: string
+          - name: img
+            type: string
+            hidden: true
+          - name: alt
+            type: string
+            hidden: true
+
+  # ------------------------------------------------------------------ Events
+  - name: events
+    label: Events
+    type: file
+    path: content/events.json
+    format: json
+    fields:
+      - name: events
+        label: Events
+        description: The site sorts these by date. An event moves to "Past events" by itself the day after it happens.
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{title}  {date}"
+        fields:
+          - name: title
+            label: Event name
+            type: string
+            required: true
+          - name: date
+            label: Date
+            description: Leave empty for something with no date yet.
+            type: date
+            default: ""
+            options:
+              format: yyyy-MM-dd
+          - name: end
+            label: Last day (only for an event that runs several days)
+            type: date
+            default: ""
+            options:
+              format: yyyy-MM-dd
+          - name: time
+            label: Time (optional)
+            description: "For example: 2–4 PM"
+            type: string
+          - name: blurb
+            label: Description
+            type: text
+          - name: img
+            label: Flyer or photo
+            description: Visitors can tap it to see it full size.
+            type: image
+            options:
+              media: flyers
+          - name: alt
+            label: What the picture shows
+            description: "One short sentence, read aloud to visitors who cannot see the picture."
+            type: string
+          - name: ongoing
+            label: Ongoing, with no end date
+            description: Keeps it under "Coming up" until you turn this off.
+            type: boolean
+          - name: badge
+            label: Label for an ongoing event (optional)
+            description: "For example: Now booking"
+            type: string
+          - name: when
+            label: Words to show instead of the date (optional)
+            description: "For example: April 2026"
+            type: string
+          - name: cta
+            type: object
+            hidden: true
+            fields:
+              - name: text
+                type: string
+              - name: href
+                type: string
+
+  # ------------------------------------------------------------------ Wall of fame
+  - name: visitors
+    label: Wall of fame
+    type: file
+    path: content/visitors.json
+    format: json
+    fields:
+      - name: visitors
+        label: Guest photos
+        description: Newest first. Only post a guest's photo with their OK.
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{name}"
+        fields:
+          - name: img
+            label: Photo
+            type: image
+            required: true
+            options:
+              media: guests
+          - name: name
+            label: Who it is
+            type: string
+          - name: note
+            label: What folks know them for (optional)
+            type: string
+          - name: when
+            label: When they came by (optional)
+            description: "For example: March 2027"
+            type: string
+
+  # ------------------------------------------------------------------ Hours and specials
+  - name: hours
+    label: Hours, happy hour and this week
+    type: file
+    path: content/hours.json
+    format: json
+    fields:
+      - name: hours
+        label: Opening hours
+        description: "Times use the 24-hour clock: 9 PM is 21:00, 9:30 PM is 21:30."
+        type: object
+        list:
+          min: 7
+          max: 7
+          collapsible:
+            collapsed: true
+            summary: "{day}  {open} to {close}"
+        fields:
+          - name: day
+            label: Day
+            type: string
+            readonly: true
+          - name: closed
+            label: Closed all day
+            type: boolean
+          - name: open
+            label: Opens
+            type: string
+            pattern:
+              regex: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+              message: "Use 24-hour time, for example 11:00 or 21:30."
+          - name: close
+            label: Closes
+            type: string
+            pattern:
+              regex: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+              message: "Use 24-hour time, for example 11:00 or 21:30."
+      - name: happyHour
+        label: Happy hour
+        type: object
+        fields:
+          - name: headline
+            label: Big line
+            description: "For example: $2 domestic beers"
+            type: string
+          - name: detail
+            label: Details
+            type: text
+          - name: when
+            label: Days and times
+            type: string
+      - name: weekly
+        label: This week at The Grove
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{day}  {title}"
+        fields:
+          - name: day
+            label: Day
+            description: "Short, for example: Thu"
+            type: string
+          - name: title
+            label: What is on
+            type: string
+          - name: note
+            label: Small print (optional)
+            type: string
+      - name: weeklyIsSample
+        label: Mark the weekly board as a sample lineup
+        description: Turn this off once the board shows the real schedule.
+        type: boolean

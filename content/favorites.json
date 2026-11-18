@@ -1,0 +1,52 @@
+{
+  "favorites": [
+    {
+      "name": "Ribs off the grill",
+      "blurb": "The plate people drive in for. Get four bones for a taste, or commit to the full rack.",
+      "price": "4 bones $14.99 · Half rack + 2 sides $24.99 · Full rack $31.99",
+      "mentions": 63,
+      "img": "images/ribs-sliced.jpg",
+      "alt": "Sliced ribs glazed with barbecue sauce"
+    },
+    {
+      "name": "Pork Steak",
+      "blurb": "Off the grill and sauced, it's the regulars' other order. Have it on its own, as a plate with sides, or teamed up with ribs or chicken.",
+      "price": "Single $14.99 · Plate with 2 sides $20.99",
+      "tag": "Off the grill",
+      "img": "images/pork-steak.jpg",
+      "alt": "A sauced pork steak with toasted buns"
+    },
+    {
+      "name": "Shrimp Po' Boy",
+      "blurb": "Crispy fried shrimp piled on a toasted roll with lettuce, tomato and sauce. A Louisiana classic, Oak Grove style.",
+      "price": "$13.99",
+      "mentions": 22,
+      "img": "images/poboy.jpg",
+      "alt": "Shrimp po' boy piled with fried shrimp"
+    },
+    {
+      "name": "Fried Catfish",
+      "blurb": "Two golden fillets with your pick of side and a drink. Add six shrimp if you came hungry.",
+      "price": "$18.99 · with 6 shrimp $23.00",
+      "mentions": 15,
+      "img": "images/catfish-fries.jpg",
+      "alt": "Golden fried catfish with fries"
+    },
+    {
+      "name": "Wings",
+      "blurb": "Six sauces, including our in-house Raspberry Heat.",
+      "price": "5 for $9.99 · 10 for $15.99",
+      "tag": "House sauce",
+      "img": "images/wings-raspberry.jpg",
+      "alt": "Wings glazed in Raspberry Heat sauce"
+    },
+    {
+      "name": "Collard Greens",
+      "blurb": "The side with its own fan club. Order it next to anything.",
+      "price": "$3.99",
+      "mentions": 20,
+      "img": "images/collard-greens.jpg",
+      "alt": "A serving of collard greens"
+    }
+  ]
+}

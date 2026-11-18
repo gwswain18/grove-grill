@@ -1,0 +1,66 @@
+# Shrinks photos the owner uploads through the admin (event flyers and wall of fame photos).
+# A phone photo can be 5 MB or more; this saves a web-sized copy in its place and removes the
+# hidden camera details. It only runs when something in those two folders changes, and the site
+# still publishes normally if this ever fails: the photo just stays at its original size.
+
+name: Shrink uploaded photos
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "images/events/**"
+      - "images/visitors/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: shrink-photos
+  cancel-in-progress: false
+
+jobs:
+  shrink:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install the image library
+        run: pip install --quiet pillow
+
+      - name: Shrink the photos
+        run: python .github/scripts/shrink_photos.py images/events images/visitors
+
+      - name: Save the smaller copies
+        id: save
+        run: |
+          if [ -z "$(git status --porcelain -- images/events images/visitors)" ]; then
+            echo "Nothing needed shrinking."
+            exit 0
+          fi
+          git config user.name "photo-shrinker"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- images/events images/visitors
+          git commit --quiet -m "Shrink uploaded photos"
+          # The owner may have saved something else in the meantime, so retry on top of it.
+          for attempt in 1 2 3 4; do
+            if git pull --quiet --rebase origin main && git push --quiet origin HEAD:main; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Could not save the smaller copies. The originals stay in place."
+          exit 1
+
+      - name: Publish the site again with the smaller photos
+        if: steps.save.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST "repos/${{ github.repository }}/pages/builds" --silent

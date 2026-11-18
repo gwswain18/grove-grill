@@ -1,0 +1,74 @@
+{
+  "hours": [
+    {
+      "day": "Sunday",
+      "closed": false,
+      "open": "12:00",
+      "close": "19:00"
+    },
+    {
+      "day": "Monday",
+      "closed": false,
+      "open": "11:00",
+      "close": "19:00"
+    },
+    {
+      "day": "Tuesday",
+      "closed": false,
+      "open": "11:00",
+      "close": "21:00"
+    },
+    {
+      "day": "Wednesday",
+      "closed": false,
+      "open": "11:00",
+      "close": "21:00"
+    },
+    {
+      "day": "Thursday",
+      "closed": false,
+      "open": "11:00",
+      "close": "21:00"
+    },
+    {
+      "day": "Friday",
+      "closed": false,
+      "open": "11:00",
+      "close": "21:00"
+    },
+    {
+      "day": "Saturday",
+      "closed": false,
+      "open": "12:00",
+      "close": "21:30"
+    }
+  ],
+  "happyHour": {
+    "headline": "$2 domestic beers",
+    "detail": "Bud Light, Busch Light, Michelob Ultra and Coors Light, poured cold. Imports are $3 and happy hour wings are $10.",
+    "when": "Ask at the bar for today's happy hour times."
+  },
+  "weekly": [
+    {
+      "day": "Thu",
+      "title": "Thursday night football",
+      "note": "Sound on, wings up"
+    },
+    {
+      "day": "Sat",
+      "title": "College football Saturday",
+      "note": "Doors at noon"
+    },
+    {
+      "day": "Sun",
+      "title": "Pro football Sunday",
+      "note": "Doors at noon, every screen"
+    },
+    {
+      "day": "Daily",
+      "title": "Happy hour",
+      "note": "$2 domestic beers"
+    }
+  ],
+  "weeklyIsSample": true
+}

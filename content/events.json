@@ -1,0 +1,51 @@
+{
+  "events": [
+    {
+      "title": "Football season at The Grove",
+      "ongoing": true,
+      "badge": "Happening now · all season",
+      "blurb": "Catch the games on the big screens all season, with game day food and drink specials.",
+      "img": "/images/events/football-season.jpg",
+      "alt": "Flyer: football season at The Grove, open 7 days a week",
+      "cta": {
+        "text": "Book a watch party",
+        "href": "catering.html#inquiry"
+      }
+    },
+    {
+      "title": "Holiday catering",
+      "ongoing": true,
+      "badge": "Now booking",
+      "blurb": "Sides and trays for your family dinner. Send the date and headcount and we'll call you back.",
+      "img": "/images/events/holiday-catering.jpg",
+      "alt": "Trays of baked macaroni and cheese",
+      "cta": {
+        "text": "Start an order",
+        "href": "catering.html#inquiry"
+      }
+    },
+    {
+      "title": "Free Food Tasting & Holiday Catering Showcase",
+      "date": "2026-11-14",
+      "time": "2–4 PM",
+      "blurb": "Free admission. Guests sampled menu favorites and previewed the holiday catering sides.",
+      "img": "/images/events/holiday-catering-showcase.jpg",
+      "alt": "Flyer: Free Food Tasting and Holiday Catering Showcase, Saturday November 14, 2026"
+    },
+    {
+      "title": "Veterans Day Special",
+      "date": "2026-11-11",
+      "blurb": "15% off all orders, with an extra 15% off for military and veterans.",
+      "img": "/images/events/veterans-day-special.jpg",
+      "alt": "Flyer: Veterans Day special, 15% off all orders"
+    },
+    {
+      "title": "Grand opening",
+      "date": "2026-04-01",
+      "when": "April 2026",
+      "blurb": "The crew cut the ribbon and opened the doors on Fort Campbell Boulevard.",
+      "img": "/images/events/grand-opening.jpg",
+      "alt": "The Grove crew cutting the ribbon at the grand opening"
+    }
+  ]
+}

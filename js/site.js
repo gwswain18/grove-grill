@@ -1,4 +1,6 @@
-/* Shared behaviour for every page. Content comes from data/site-data.js (window.GROVE). */
+/* Shared behaviour for every page.
+   Settings come from data/site-data.js (window.GROVE). The parts the owner edits in the admin
+   (menu, bar, favorites, events, wall of fame, hours) are loaded from content/*.json.          */
 (function () {
   "use strict";
 
@@ -13,6 +15,30 @@
     });
   };
 
+  // Photos picked in the owner admin are saved as "/images/…". The site can live in a sub-folder
+  // (as it does on GitHub Pages), so every picture path is taken relative to the page instead.
+  function asset(path) {
+    var p = String(path == null ? "" : path).trim();
+    return /^(https?:)?\/\//i.test(p) ? p : p.replace(/^\/+/, "");
+  }
+
+  // Prices are stored as plain numbers (14.99) and shown as "$14.99". Empty means no price.
+  function fmtPrice(p) {
+    if (p == null || p === "") return "";
+    var n = typeof p === "number" ? p : Number(String(p).replace(/[$,\s]/g, ""));
+    return isFinite(n) ? "$" + n.toFixed(2) : String(p);
+  }
+
+  // Links typed into the admin may only be ordinary ones.
+  function safeHref(href) {
+    var h = String(href == null ? "" : href).trim();
+    return !h || /^\s*(javascript|data|vbscript):/i.test(h) ? "#" : h;
+  }
+
+  function slug(s) {
+    return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+
   // Things to switch off before one page's content is swapped for another's (timers, observers).
   var teardowns = [];
   // Set by music(): refreshes the music buttons after a page swap.
@@ -21,12 +47,15 @@
   /* ---------- Hours ---------- */
 
   function toMinutes(hhmm) {
-    var p = hhmm.split(":");
+    var p = String(hhmm).split(":");
     return Number(p[0]) * 60 + Number(p[1]);
   }
 
+  // A day with no opening or closing time filled in counts as closed.
+  function shut(d) { return !d || d.closed || !d.open || !d.close; }
+
   function fmtTime(hhmm) {
-    var p = hhmm.split(":");
+    var p = String(hhmm).split(":");
     var h = Number(p[0]);
     var m = p[1];
     var suffix = h >= 12 ? "PM" : "AM";
@@ -48,17 +77,19 @@
   }
 
   function openStatus() {
+    // Without a full week of hours there is nothing sensible to say, so say nothing.
+    if (!G.hours || G.hours.length !== 7) return { state: "unknown", text: "", dayIndex: -1 };
     var now = nowAtRestaurant();
     var today = G.hours[now.dayIndex];
-    if (!today.closed && now.minutes >= toMinutes(today.open) && now.minutes < toMinutes(today.close)) {
+    if (!shut(today) && now.minutes >= toMinutes(today.open) && now.minutes < toMinutes(today.close)) {
       return { state: "open", text: "Open now · until " + fmtTime(today.close), dayIndex: now.dayIndex };
     }
-    if (!today.closed && now.minutes < toMinutes(today.open)) {
+    if (!shut(today) && now.minutes < toMinutes(today.open)) {
       return { state: "closed", text: "Closed · opens " + fmtTime(today.open), dayIndex: now.dayIndex };
     }
     for (var step = 1; step <= 7; step++) {
       var next = G.hours[(now.dayIndex + step) % 7];
-      if (!next.closed) {
+      if (!shut(next)) {
         var when = step === 1 ? "tomorrow" : next.day;
         return { state: "closed", text: "Closed · opens " + when + " " + fmtTime(next.open), dayIndex: now.dayIndex };
       }
@@ -176,17 +207,20 @@
     $$("[data-city]").forEach(function (el) { el.textContent = G.address.cityLine; });
     $$("[data-rating-score]").forEach(function (el) { el.textContent = G.rating.score; });
     $$("[data-rating-count]").forEach(function (el) { el.textContent = G.rating.count; });
-    $$("[data-open-chip]").forEach(function (el) { el.textContent = status.text; el.setAttribute("data-state", status.state); });
+    $$("[data-open-chip]").forEach(function (el) {
+      el.textContent = status.text; el.setAttribute("data-state", status.state); el.hidden = !status.text;
+    });
     $$("[data-open-line]").forEach(function (el) { el.textContent = status.text; });
 
     $$("[data-hours]").forEach(function (table) {
+      if (status.dayIndex < 0) { table.innerHTML = ""; return; }
       // Show Monday first, the way people read a week.
       var order = [1, 2, 3, 4, 5, 6, 0];
       table.innerHTML = "<caption class=\"label\" style=\"text-align:left;color:var(--gold-300);padding-bottom:6px\">Hours</caption>" +
         order.map(function (i) {
           var d = G.hours[i];
-          var span = d.closed ? "Closed" : fmtTime(d.open) + " – " + fmtTime(d.close);
-          return '<tr class="' + (i === status.dayIndex ? "is-today" : "") + '"><th scope="row">' + d.day + "</th><td>" + span + "</td></tr>";
+          var span = shut(d) ? "Closed" : fmtTime(d.open) + " – " + fmtTime(d.close);
+          return '<tr class="' + (i === status.dayIndex ? "is-today" : "") + '"><th scope="row">' + esc(d.day) + "</th><td>" + span + "</td></tr>";
         }).join("");
     });
 
@@ -196,34 +230,38 @@
 
     $$("[data-map]").forEach(function (frame) { frame.src = G.links.mapEmbed; });
 
-    $$("[data-happy-headline]").forEach(function (el) { el.textContent = G.happyHour.headline; });
-    $$("[data-happy-detail]").forEach(function (el) { el.textContent = G.happyHour.detail; });
-    $$("[data-happy-when]").forEach(function (el) { el.textContent = G.happyHour.when; });
+    var happy = G.happyHour || {};
+    $$("[data-happy-headline]").forEach(function (el) { if (happy.headline) el.textContent = happy.headline; });
+    $$("[data-happy-detail]").forEach(function (el) { el.textContent = happy.detail || ""; });
+    $$("[data-happy-when]").forEach(function (el) { el.textContent = happy.when || ""; });
   }
 
   /* ---------- Home page pieces ---------- */
 
   function favCard(f, lead) {
     return '<article class="fav' + (lead ? " fav--lead" : "") + '">' +
-      (f.img ? '<img class="fav__img" src="' + esc(f.img) + '" alt="' + esc(f.alt || f.name) + '" loading="lazy">' : "") +
+      (f.img ? '<img class="fav__img" src="' + esc(asset(f.img)) + '" alt="' + esc(f.alt || f.name) + '" loading="lazy">' : "") +
       '<div class="fav__body">' +
-        (f.mentions ? '<span class="fav__mentions">Named in ' + f.mentions + " Google reviews</span>" : "") +
+        (f.mentions ? '<span class="fav__mentions">Named in ' + esc(f.mentions) + " Google reviews</span>" : "") +
         (f.tag ? '<span class="fav__mentions fav__tag">' + esc(f.tag) + "</span>" : "") +
         '<h3 class="fav__name">' + esc(f.name) + "</h3>" +
-        "<p>" + esc(f.blurb) + "</p>" +
-        '<p class="fav__price">' + esc(f.price) + "</p>" +
+        (f.blurb ? "<p>" + esc(f.blurb) + "</p>" : "") +
+        (f.price ? '<p class="fav__price">' + esc(f.price) + "</p>" : "") +
       "</div></article>";
   }
 
   function renderHome() {
     var favs = $("[data-favorites]");
-    if (favs && G.favorites.length) {
-      favs.innerHTML = favCard(G.favorites[0], true) +
-        '<div class="fav-list">' + G.favorites.slice(1).map(function (f) { return favCard(f, false); }).join("") + "</div>";
+    var favList = G.favorites || [];
+    if (favs && favList.length) {
+      favs.innerHTML = favCard(favList[0], true) +
+        (favList.length > 1
+          ? '<div class="fav-list">' + favList.slice(1).map(function (f) { return favCard(f, false); }).join("") + "</div>"
+          : "");
     }
 
     var events = $("[data-weekly]");
-    if (events && G.weekly) {
+    if (events && G.weekly && G.weekly.length) {
       events.innerHTML =
         '<div class="board__head"><h3 class="board__title">This week</h3>' +
         (G.weeklyIsSample ? '<span class="board__tag">Sample lineup</span>' : "") + "</div>" +
@@ -280,7 +318,15 @@
     return get("year") + "-" + get("month") + "-" + get("day");
   }
 
-  function fmtDate(iso) {
+  // "2027-02-14" (anything after the first ten characters is ignored). Empty or odd dates give "".
+  function isoDay(value) {
+    var s = String(value == null ? "" : value).slice(0, 10);
+    return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : "";
+  }
+
+  function fmtDate(value) {
+    var iso = isoDay(value);
+    if (!iso) return "";
     var p = iso.split("-");
     var d = new Date(Date.UTC(Number(p[0]), Number(p[1]) - 1, Number(p[2])));
     return new Intl.DateTimeFormat("en-US", {
@@ -289,19 +335,21 @@
   }
 
   function eventCard(e, past) {
+    var dates = fmtDate(e.date) + (fmtDate(e.end) ? " to " + fmtDate(e.end) : "");
     var when = e.ongoing
       ? (e.badge || "Happening now")
-      : (e.when || fmtDate(e.date) + (e.end ? " to " + fmtDate(e.end) : "")) + (e.time ? " · " + e.time : "");
-    var flyer = e.img
-      ? '<button type="button" class="event-card__flyer" data-flyer="' + esc(e.img) + '" data-flyer-alt="' + esc(e.alt || e.title) +
-          '" aria-label="View full size: ' + esc(e.title) + '"><img src="' + esc(e.img) + '" alt="' + esc(e.alt || "") + '" loading="lazy"></button>'
+      : (e.when || dates || "Date to be announced") + (e.time ? " · " + e.time : "");
+    var img = asset(e.img);
+    var flyer = img
+      ? '<button type="button" class="event-card__flyer" data-flyer="' + esc(img) + '" data-flyer-alt="' + esc(e.alt || e.title) +
+          '" aria-label="View full size: ' + esc(e.title) + '"><img src="' + esc(img) + '" alt="' + esc(e.alt || "") + '" loading="lazy"></button>'
       : "";
     return '<article class="event-card' + (past ? " event-card--past" : "") + '">' + flyer +
       '<div class="event-card__body">' +
         '<p class="event-card__when' + (e.ongoing ? " is-live" : "") + '">' + esc(when) + "</p>" +
         '<h4 class="event-card__title">' + esc(e.title) + "</h4>" +
         (e.blurb ? "<p>" + esc(e.blurb) + "</p>" : "") +
-        (!past && e.cta ? '<a class="text-link" href="' + esc(e.cta.href) + '">' + esc(e.cta.text) + "</a>" : "") +
+        (!past && e.cta && e.cta.text ? '<a class="text-link" href="' + esc(safeHref(e.cta.href)) + '">' + esc(e.cta.text) + "</a>" : "") +
       "</div></article>";
   }
 
@@ -314,15 +362,18 @@
     var upcoming = [];
     var past = [];
     G.events.forEach(function (e) {
-      var last = e.end || e.date;
-      if (e.ongoing || (last && last >= today)) upcoming.push(e); else past.push(e);
+      if (!e || !e.title) return;
+      var last = isoDay(e.end) || isoDay(e.date);
+      // Ongoing, still to come, or no date set yet: all of those are "coming up".
+      if (e.ongoing || !last || last >= today) upcoming.push(e); else past.push(e);
     });
     // Dated events first, soonest at the top; open-ended ones after. Past events newest first.
+    var rank = function (e) { return e.ongoing ? 2 : isoDay(e.date) ? 0 : 1; };
     upcoming.sort(function (a, b) {
-      if (!!a.ongoing !== !!b.ongoing) return a.ongoing ? 1 : -1;
-      return (a.date || "") < (b.date || "") ? -1 : 1;
+      if (rank(a) !== rank(b)) return rank(a) - rank(b);
+      return isoDay(a.date) < isoDay(b.date) ? -1 : 1;
     });
-    past.sort(function (a, b) { return (a.date || "") < (b.date || "") ? 1 : -1; });
+    past.sort(function (a, b) { return isoDay(a.date) < isoDay(b.date) ? 1 : -1; });
 
     upBox.innerHTML = upcoming.length
       ? upcoming.map(function (e) { return eventCard(e, false); }).join("")
@@ -338,7 +389,7 @@
     var box = $("[data-visitors]");
     if (!wrap || !box) return;
 
-    var list = G.visitors || [];
+    var list = (G.visitors || []).filter(function (v) { return v && v.img; });
     // With no photos yet, the draft shows empty frames so the owner can see the layout.
     // The finished site hides the whole section until there is a photo to show.
     var sample = !list.length && !!G.draft;
@@ -357,12 +408,71 @@
     box.innerHTML = list.map(function (v) {
       var note = [v.note, v.when].filter(Boolean).join(" · ");
       var alt = v.alt || (v.name ? v.name + " at The Grove" : "A guest at The Grove");
+      var img = asset(v.img);
       return '<figure class="snap">' +
-        '<button type="button" class="snap__photo" data-flyer="' + esc(v.img) + '" data-flyer-alt="' + esc(alt) +
-          '" aria-label="View full size: ' + esc(v.name || "guest photo") + '"><img src="' + esc(v.img) + '" alt="' + esc(alt) + '" loading="lazy"></button>' +
+        '<button type="button" class="snap__photo" data-flyer="' + esc(img) + '" data-flyer-alt="' + esc(alt) +
+          '" aria-label="View full size: ' + esc(v.name || "guest photo") + '"><img src="' + esc(img) + '" alt="' + esc(alt) + '" loading="lazy"></button>' +
         "<figcaption>" + (v.name ? '<span class="snap__name">' + esc(v.name) + "</span>" : "") +
           (note ? '<span class="snap__note">' + esc(note) + "</span>" : "") + "</figcaption></figure>";
     }).join("");
+  }
+
+  /* ---------- Live Google reviews (optional) ---------- */
+
+  // With reviewsWidgetId set in data/site-data.js, the reviews section shows the live widget.
+  // The widget's own script fills the box, so it is loaded again each time the box is rebuilt.
+  function liveReviews() {
+    var box = $("[data-live-reviews]");
+    if (!box) return;
+    var id = String(G.reviewsWidgetId || "").replace(/^featurable-/, "").trim();
+    box.hidden = !id;
+    if (!id) { box.innerHTML = ""; return; }
+
+    box.innerHTML = '<p class="label" style="margin-bottom:14px">Latest Google reviews</p>' +
+      '<div id="featurable-' + esc(id) + '" data-featurable-async></div>';
+    var old = document.getElementById("review-widget-script");
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var s = document.createElement("script");
+    s.id = "review-widget-script";
+    s.src = "https://featurable.com/assets/bundle.js";
+    s.defer = true;
+    document.body.appendChild(s);
+  }
+
+  /* ---------- Facts for search engines ---------- */
+
+  // Describes the restaurant to Google and friends, built from the same hours the page shows,
+  // so the two can never disagree.
+  function structuredData() {
+    var data = {
+      "@context": "https://schema.org",
+      "@type": "Restaurant",
+      name: G.name,
+      servesCuisine: ["Barbecue", "Southern", "Soul Food", "American"],
+      priceRange: "$10-20",
+      telephone: String(G.phoneHref || "").replace(/^tel:/, ""),
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: G.address.street,
+        addressLocality: G.address.city,
+        addressRegion: G.address.state,
+        postalCode: G.address.zip,
+        addressCountry: "US"
+      }
+    };
+    if (G.hours && G.hours.length === 7) {
+      data.openingHoursSpecification = G.hours.filter(function (d) { return !shut(d); }).map(function (d) {
+        return { "@type": "OpeningHoursSpecification", dayOfWeek: d.day, opens: d.open, closes: d.close };
+      });
+    }
+    var tag = document.getElementById("restaurant-facts");
+    if (!tag) {
+      tag = document.createElement("script");
+      tag.type = "application/ld+json";
+      tag.id = "restaurant-facts";
+      document.head.appendChild(tag);
+    }
+    tag.textContent = JSON.stringify(data);
   }
 
   /* ---------- The anthem ---------- */
@@ -598,7 +708,7 @@
   function itemRow(it) {
     return '<div class="item' + (it.sub ? " item--sub" : "") + '"><span class="item__what"><span class="item__name">' + esc(it.name) + "</span>" +
       (it.detail ? ' <span class="item__detail">' + esc(it.detail) + "</span>" : "") + "</span>" +
-      (it.price ? '<span class="item__dots" aria-hidden="true"></span><span class="item__price">$' + esc(it.price) + "</span>" : "") +
+      (fmtPrice(it.price) ? '<span class="item__dots" aria-hidden="true"></span><span class="item__price">' + esc(fmtPrice(it.price)) + "</span>" : "") +
       "</div>";
   }
 
@@ -606,45 +716,63 @@
     var grid = $("[data-menu]");
     if (!grid) return;
 
-    var cards = G.menu.map(function (sec) {
+    var sections = (G.menu || []).filter(function (sec) { return sec && sec.title; });
+    if (!sections.length) {
+      grid.innerHTML = '<p class="events__empty">The menu did not load. Please refresh the page, or call us at ' +
+        '<a href="' + esc(G.phoneHref) + '">' + esc(G.phone) + "</a>.</p>";
+      return;
+    }
+    // A section added in the admin has no id yet, so make one from its name for the jump links.
+    var ids = sections.map(function (sec, i) { return sec.id || slug(sec.title) || "section-" + (i + 1); });
+
+    var cards = sections.map(function (sec, i) {
       var body = "";
       if (sec.note) body += '<p class="menu-card__note">' + esc(sec.note) + "</p>";
-      if (sec.items) body += sec.items.map(itemRow).join("");
-      if (sec.plain) body += '<ul class="chips">' + sec.plain.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul>";
-      if (sec.chips) {
+      if (sec.items) body += sec.items.filter(function (it) { return it && it.name; }).map(itemRow).join("");
+      if (sec.plain && sec.plain.length) body += '<ul class="chips">' + sec.plain.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul>";
+      if (sec.chips && sec.chips.length) {
         body += '<p class="chips-label">' + esc(sec.chipsLabel || "") + "</p>" +
           '<ul class="chips">' + sec.chips.map(function (c) { return "<li>" + esc(c) + "</li>"; }).join("") + "</ul>";
       }
       if (sec.footnote) body += '<p class="menu-card__foot">' + esc(sec.footnote) + "</p>";
-      var photo = sec.img ? '<img class="menu-card__img" src="' + esc(sec.img) + '" alt="' + esc(sec.imgAlt || "") + '" loading="lazy">' : "";
-      return '<section class="menu-card" id="' + esc(sec.id) + '"><div class="menu-card__head"><h2 class="menu-card__title">' +
+      var photo = sec.img ? '<img class="menu-card__img" src="' + esc(asset(sec.img)) + '" alt="' + esc(sec.imgAlt || "") + '" loading="lazy">' : "";
+      return '<section class="menu-card" id="' + esc(ids[i]) + '"><div class="menu-card__head"><h2 class="menu-card__title">' +
         esc(sec.title) + "</h2></div>" + photo + '<div class="menu-card__body">' + body + "</div></section>";
     });
 
-    var bar = G.bar;
-    cards.push(
-      '<section class="menu-card menu-card--bar" id="cocktails"><div class="menu-card__head"><h2 class="menu-card__title">Cocktails</h2></div>' +
-      (bar.cocktailImg ? '<img class="menu-card__img" style="object-position:50% 38%" src="' + esc(bar.cocktailImg) + '" alt="' + esc(bar.cocktailImgAlt || "") + '" loading="lazy">' : "") +
-      '<div class="menu-card__body">' +
-      (bar.cocktailNote ? '<p class="menu-card__note">' + esc(bar.cocktailNote) + "</p>" : "") +
-      bar.cocktails.map(function (c) {
-        return '<div class="cocktail"><p class="cocktail__name"><span>' + esc(c.name) +
-          (c.tag ? '<span class="cocktail__tag">' + esc(c.tag) + "</span>" : "") + "</span>" +
-          (c.price ? '<span class="item__dots" aria-hidden="true"></span><span class="item__price">$' + esc(c.price) + "</span>" : "") + "</p>" +
-          '<p class="cocktail__detail">' + esc(c.detail) + "</p></div>";
-      }).join("") + "</div></section>"
-    );
-    cards.push(
-      '<section class="menu-card menu-card--bar" id="beer"><div class="menu-card__head"><h2 class="menu-card__title">Beer &amp; Seltzers</h2></div>' +
-      '<div class="menu-card__body"><p class="menu-card__note">' + esc(G.happyHour.headline) + " at happy hour.</p>" +
-      bar.beer.map(itemRow).join("") + "</div></section>"
-    );
+    var bar = G.bar || {};
+    var cocktails = (bar.cocktails || []).filter(function (c) { return c && c.name; });
+    var beer = (bar.beer || []).filter(function (b) { return b && b.name; });
+    var barLinks = [];
+    if (cocktails.length) {
+      barLinks.push({ id: "cocktails", title: "Cocktails" });
+      cards.push(
+        '<section class="menu-card menu-card--bar" id="cocktails"><div class="menu-card__head"><h2 class="menu-card__title">Cocktails</h2></div>' +
+        (bar.cocktailImg ? '<img class="menu-card__img" style="object-position:50% 38%" src="' + esc(asset(bar.cocktailImg)) + '" alt="' + esc(bar.cocktailImgAlt || "") + '" loading="lazy">' : "") +
+        '<div class="menu-card__body">' +
+        (bar.cocktailNote ? '<p class="menu-card__note">' + esc(bar.cocktailNote) + "</p>" : "") +
+        cocktails.map(function (c) {
+          return '<div class="cocktail"><p class="cocktail__name"><span>' + esc(c.name) +
+            (c.tag ? '<span class="cocktail__tag">' + esc(c.tag) + "</span>" : "") + "</span>" +
+            (fmtPrice(c.price) ? '<span class="item__dots" aria-hidden="true"></span><span class="item__price">' + esc(fmtPrice(c.price)) + "</span>" : "") + "</p>" +
+            (c.detail ? '<p class="cocktail__detail">' + esc(c.detail) + "</p>" : "") + "</div>";
+        }).join("") + "</div></section>"
+      );
+    }
+    if (beer.length) {
+      barLinks.push({ id: "beer", title: "Beer" });
+      var happy = G.happyHour && G.happyHour.headline;
+      cards.push(
+        '<section class="menu-card menu-card--bar" id="beer"><div class="menu-card__head"><h2 class="menu-card__title">Beer &amp; Seltzers</h2></div>' +
+        '<div class="menu-card__body">' + (happy ? '<p class="menu-card__note">' + esc(happy) + " at happy hour.</p>" : "") +
+        beer.map(itemRow).join("") + "</div></section>"
+      );
+    }
     grid.innerHTML = cards.join("");
 
     var nav = $("[data-menu-nav]");
     if (nav) {
-      var links = G.menu.map(function (s) { return { id: s.id, title: s.nav || s.title }; })
-        .concat([{ id: "cocktails", title: "Cocktails" }, { id: "beer", title: "Beer" }]);
+      var links = sections.map(function (s, i) { return { id: ids[i], title: s.nav || s.title }; }).concat(barLinks);
       nav.innerHTML = links.map(function (l) { return '<li><a href="#' + l.id + '">' + esc(l.title) + "</a></li>"; }).join("");
     }
   }
@@ -724,6 +852,7 @@
     renderHome();
     renderEvents();
     renderVisitors();
+    liveReviews();
     heroSlideshow();
     renderMenu();
     markCurrent();
@@ -839,9 +968,47 @@
     if (window.requestIdleCallback) requestIdleCallback(warm, { timeout: 4000 }); else setTimeout(warm, 2500);
   }
 
+  /* ---------- The owner's content ----------
+     Each file in content/ is what the owner edits in the admin. They are fetched fresh on every
+     visit, so a saved change shows up without anyone touching the code. A file that fails to load
+     only empties its own part of the page; everything else still works.                        */
+
+  var CONTENT = ["hours", "favorites", "menu", "bar", "events", "visitors"];
+
+  function loadContent() {
+    if (!window.fetch || !window.Promise) return { then: function (done) { done(); } };
+    return Promise.all(CONTENT.map(function (name) {
+      return fetch("content/" + name + ".json", { cache: "no-cache", credentials: "same-origin" })
+        .then(function (res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return res.json();
+        })
+        .catch(function (err) {
+          if (window.console) console.error("Could not load content/" + name + ".json", err);
+          return null;
+        });
+    })).then(function (parts) {
+      var c = {};
+      CONTENT.forEach(function (name, i) { c[name] = parts[i] || {}; });
+      G.hours = c.hours.hours || [];
+      G.happyHour = c.hours.happyHour || {};
+      G.weekly = c.hours.weekly || [];
+      G.weeklyIsSample = !!c.hours.weeklyIsSample;
+      G.favorites = c.favorites.favorites || [];
+      G.menu = c.menu.sections || [];
+      G.bar = c.bar;
+      G.events = c.events.events || [];
+      G.visitors = c.visitors.visitors || [];
+    });
+  }
+
+  // The header, footer and music do not need the owner's content, so they go up straight away.
   buildChrome();
   music();
   wireUp();
-  initPage();
-  router();
+  loadContent().then(function () {
+    structuredData();
+    initPage();
+    router();
+  });
 })();

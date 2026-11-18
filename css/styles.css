@@ -189,6 +189,9 @@ button { font: inherit; color: inherit; }
 .nav a:hover, .nav a[aria-current="page"] { color: var(--gold-300); border-bottom-color: var(--gold-500); }
 
 .header-actions { display: flex; align-items: center; gap: 14px; }
+/* On mid-size screens the open/closed line would push the header past the edge. It is still
+   shown in the Visit section and the footer. */
+@media (max-width: 1260px) { .header-actions .open-chip { display: none; } }
 
 .open-chip {
   display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
@@ -586,11 +589,15 @@ button { font: inherit; color: inherit; }
 @media (max-width: 900px) { .events--upcoming { grid-template-columns: 1fr; } .events--past { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .events--past { grid-template-columns: 1fr; } }
 
+.live-reviews { margin-top: clamp(28px, 4vw, 48px); }
+
 /* ---------- Wall of fame ---------- */
 
 [hidden] { display: none !important; }
 
-.wall { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(18px, 2.8vw, 34px); }
+/* Four to a row, centered, so one or two photos still look deliberate. */
+.wall { --wall-gap: clamp(18px, 2.8vw, 34px); display: flex; flex-wrap: wrap; justify-content: center; gap: var(--wall-gap); }
+.wall .snap { flex: 0 0 calc((100% - 3 * var(--wall-gap)) / 4); min-width: 0; }
 /* Each photo sits in a cream frame, pinned up slightly crooked like a snapshot on the wall. */
 .snap {
   margin: 0; background: var(--cream-50); color: var(--ink); padding: 10px 10px 14px; border-radius: 4px;
@@ -610,8 +617,8 @@ button { font: inherit; color: inherit; }
 }
 .snap--empty .snap__name, .snap--empty .snap__note { opacity: 0.6; }
 .section-head .board__tag { color: var(--cream-200); border-color: var(--cream-200); }
-@media (max-width: 900px) { .wall { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 420px) { .wall { gap: 14px; } .snap { padding: 7px 7px 10px; } .snap__name { font-size: 1.3rem; } }
+@media (max-width: 900px) { .wall .snap { flex-basis: calc((100% - var(--wall-gap)) / 2); } }
+@media (max-width: 420px) { .wall { --wall-gap: 14px; } .snap { padding: 7px 7px 10px; } .snap__name { font-size: 1.3rem; } }
 
 .lightbox { padding: 0; border: 0; background: transparent; max-width: min(92vw, 900px); max-height: 94vh; overflow: visible; }
 .lightbox::backdrop { background: rgba(15, 10, 6, 0.9); }

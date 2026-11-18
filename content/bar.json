@@ -1,0 +1,79 @@
+{
+  "cocktailNote": "Mixed drinks $7 · top shelf $10.",
+  "cocktails": [
+    {
+      "name": "Groverita",
+      "tag": "House favorite",
+      "detail": "Tequila, orange liqueur and lime juice with a salted rim."
+    },
+    {
+      "name": "Rum Punch",
+      "price": 10,
+      "detail": "Light and dark rum, orange and pineapple juice, grenadine, fresh lime."
+    },
+    {
+      "name": "Lemon Drop",
+      "price": 8,
+      "detail": "Vodka, fresh lemon juice, simple syrup and triple sec with a sugar rim."
+    },
+    {
+      "name": "Moscow Mule",
+      "detail": "Vodka, fresh lime juice and ginger beer."
+    },
+    {
+      "name": "Cosmopolitan",
+      "price": 10,
+      "detail": "Citrus vodka, triple sec, fresh lime and cranberry juice."
+    },
+    {
+      "name": "Whiskey Sour",
+      "detail": "Whiskey or bourbon, lemon juice and simple syrup."
+    },
+    {
+      "name": "Tequila Sunrise",
+      "price": 8,
+      "detail": "Tequila, orange juice and grenadine."
+    },
+    {
+      "name": "Long Island Iced Tea",
+      "price": 10,
+      "detail": "Vodka, white rum, silver tequila, gin, triple sec, lemon and a splash of cola."
+    }
+  ],
+  "beer": [
+    {
+      "name": "Bud Light, Busch Light, Coors Light, Michelob Ultra",
+      "price": 3.75
+    },
+    {
+      "name": "Corona Extra, Modelo Especial",
+      "price": 4.75
+    },
+    {
+      "name": "New Belgium Voodoo Ranger IPA",
+      "price": 4.5
+    },
+    {
+      "name": "White Claw",
+      "price": 4.5
+    },
+    {
+      "name": "Straw-Ber-Rita",
+      "price": 3
+    },
+    {
+      "name": "Mang-O-Rita",
+      "price": 7.5
+    },
+    {
+      "name": "Carbliss",
+      "price": 6
+    },
+    {
+      "name": "Beer Bucket Special",
+      "price": 18
+    }
+  ],
+  "cocktailImg": "images/cocktail.jpg",
+  "cocktailImgAlt": "A cocktail with a sugared rim, cherries and lime"
+}
