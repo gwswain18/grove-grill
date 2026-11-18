@@ -134,7 +134,7 @@ button { font: inherit; color: inherit; }
 .btn--dark { background: var(--walnut-900); color: var(--cream-50); }
 .btn--dark:hover { background: var(--walnut-700); }
 
-.btn--small { min-height: 42px; padding: 8px 18px; font-size: 0.98rem; }
+.btn--small { min-height: 42px; padding: 8px 18px; font-size: 0.98rem; white-space: nowrap; }
 
 .text-link {
   font-family: var(--font-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
@@ -164,19 +164,21 @@ button { font: inherit; color: inherit; }
   display: flex; align-items: center; gap: clamp(14px, 2.5vw, 34px);
   min-height: var(--header-h);
 }
-/* The logo hangs from the header on a cream plaque, like a sign over the door. */
+/* The logo is the restaurant's wooden sign. It hangs from the header, like the sign over the door,
+   and tucks up into the header once the page is scrolled. */
 .brand {
-  display: flex; align-items: center; flex: none; text-decoration: none;
+  display: block; flex: none; text-decoration: none; overflow: hidden;
   align-self: flex-start; position: relative; z-index: 2;
-  background: var(--cream-50); padding: 8px 14px 10px;
-  border: 2px solid var(--gold-700); border-top: 0; border-radius: 0 0 16px 16px;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
-  margin-bottom: -26px;
+  background: #120c07;
+  border: 2px solid var(--gold-700); border-top: 0; border-radius: 0 0 14px 14px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+  margin-bottom: -34px;
+  transition: margin 0.25s ease;
 }
-.brand img { height: 78px; width: auto; transition: height 0.25s ease; }
-.brand { transition: margin 0.25s ease, padding 0.25s ease; }
-.site-header.is-scrolled .brand { margin-bottom: -8px; padding: 5px 12px 7px; }
-.site-header.is-scrolled .brand img { height: 60px; }
+.brand img { height: 108px; width: auto; transition: height 0.25s ease; }
+.nav a { white-space: nowrap; }
+.site-header.is-scrolled .brand { margin-bottom: -2px; }
+.site-header.is-scrolled .brand img { height: 76px; }
 
 .nav { display: flex; align-items: center; gap: clamp(14px, 2.2vw, 30px); margin-left: auto; }
 .nav a {
@@ -224,10 +226,10 @@ button { font: inherit; color: inherit; }
 }
 @media (max-width: 560px) {
   :root { --header-h: 66px; }
-  .brand { padding: 6px 10px 8px; margin-bottom: -18px; border-radius: 0 0 12px 12px; }
-  .brand img { height: 60px; }
-  .site-header.is-scrolled .brand { margin-bottom: -4px; padding: 4px 9px 5px; }
-  .site-header.is-scrolled .brand img { height: 50px; }
+  .brand { margin-bottom: -26px; border-radius: 0 0 12px 12px; }
+  .brand img { height: 90px; }
+  .site-header.is-scrolled .brand { margin-bottom: -2px; }
+  .site-header.is-scrolled .brand img { height: 66px; }
   .header-actions .btn { display: none; }
 }
 
@@ -395,7 +397,24 @@ button { font: inherit; color: inherit; }
 /* ---------- Favorites ---------- */
 
 .favs { display: grid; gap: clamp(18px, 2.6vw, 30px); }
-.fav-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 2vw, 22px); }
+/* The smaller cards sit three to a row. When the count does not divide by three, the first
+   cards go two to a row instead, so every row is full whatever number of favorites there is. */
+.fav-list { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(14px, 2vw, 22px); }
+.fav-list .fav { grid-column: span 2; }
+@media (min-width: 1001px) {
+  .fav-list .fav:first-child:nth-last-child(3n+2),
+  .fav-list .fav:first-child:nth-last-child(3n+2) + .fav,
+  .fav-list .fav:first-child:nth-last-child(3n+1),
+  .fav-list .fav:first-child:nth-last-child(3n+1) + .fav,
+  .fav-list .fav:first-child:nth-last-child(3n+1) + .fav + .fav,
+  .fav-list .fav:first-child:nth-last-child(3n+1) + .fav + .fav + .fav { grid-column: span 3; }
+  .fav-list .fav:first-child:nth-last-child(3n+2) .fav__img,
+  .fav-list .fav:first-child:nth-last-child(3n+2) + .fav .fav__img,
+  .fav-list .fav:first-child:nth-last-child(3n+1) .fav__img,
+  .fav-list .fav:first-child:nth-last-child(3n+1) + .fav .fav__img,
+  .fav-list .fav:first-child:nth-last-child(3n+1) + .fav + .fav .fav__img,
+  .fav-list .fav:first-child:nth-last-child(3n+1) + .fav + .fav + .fav .fav__img { aspect-ratio: 16 / 9; }
+}
 
 .fav {
   background: var(--cream-50); border: 2px solid var(--ink); border-radius: var(--radius);
@@ -418,12 +437,20 @@ button { font: inherit; color: inherit; }
   background: var(--green-800); color: var(--cream-50); padding: 4px 10px; border-radius: 999px;
 }
 .favs__more { margin-top: clamp(26px, 4vw, 40px); display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
-@media (max-width: 1000px) { .fav-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Tablets: two to a row. With an odd count the first card takes a full row. */
+@media (max-width: 1000px) {
+  .fav-list .fav { grid-column: span 3; }
+  .fav-list .fav:first-child:nth-last-child(odd) { grid-column: 1 / -1; }
+  .fav-list .fav:first-child:nth-last-child(odd) .fav__img { aspect-ratio: 2 / 1; }
+}
 @media (max-width: 760px) {
   .fav--lead { grid-template-columns: 1fr; }
   .fav--lead .fav__img { min-height: 0; aspect-ratio: 4 / 3; border-right: 0; border-bottom: 2px solid var(--ink); }
 }
-@media (max-width: 520px) { .fav-list { grid-template-columns: 1fr; } }
+@media (max-width: 520px) {
+  .fav-list .fav, .fav-list .fav:first-child:nth-last-child(odd) { grid-column: 1 / -1; }
+  .fav-list .fav:first-child:nth-last-child(odd) .fav__img { aspect-ratio: 16 / 11; }
+}
 
 /* ---------- Game day ---------- */
 
@@ -483,7 +510,7 @@ button { font: inherit; color: inherit; }
 .is-music-on .music-toggle { background: var(--gold-500); border-color: var(--gold-500); color: var(--walnut-950); }
 .is-music-on .music-toggle:hover { background: var(--gold-300); }
 .music-toggle__text { white-space: nowrap; }
-@media (max-width: 1240px) { .music-toggle__text { display: none; } .music-toggle { padding: 0 9px; width: 46px; justify-content: center; } }
+@media (max-width: 1400px) { .music-toggle__text { display: none; } .music-toggle { padding: 0 9px; width: 46px; justify-content: center; } }
 
 .anthem {
   display: grid; grid-template-columns: auto 1fr; gap: clamp(14px, 2vw, 22px); align-items: center; width: 100%;
@@ -498,10 +525,11 @@ button { font: inherit; color: inherit; }
   display: grid; place-items: center; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
 }
 .anthem__label {
-  width: 56%; aspect-ratio: 1; border-radius: 50%; background: var(--cream-50); display: grid; place-items: center; overflow: hidden;
+  width: 58%; aspect-ratio: 1; border-radius: 50%; background: #120c07; border: 1px solid var(--gold-700);
+  display: grid; place-items: center; overflow: hidden;
   animation: spin 5s linear infinite; animation-play-state: paused;
 }
-.anthem__label img { width: 86%; }
+.anthem__label img { width: 92%; }
 .is-music-on .anthem__label { animation-play-state: running; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .anthem__btn {
@@ -557,6 +585,33 @@ button { font: inherit; color: inherit; }
 
 @media (max-width: 900px) { .events--upcoming { grid-template-columns: 1fr; } .events--past { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .events--past { grid-template-columns: 1fr; } }
+
+/* ---------- Wall of fame ---------- */
+
+[hidden] { display: none !important; }
+
+.wall { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(18px, 2.8vw, 34px); }
+/* Each photo sits in a cream frame, pinned up slightly crooked like a snapshot on the wall. */
+.snap {
+  margin: 0; background: var(--cream-50); color: var(--ink); padding: 10px 10px 14px; border-radius: 4px;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45); transform: rotate(-1.6deg);
+}
+.snap:nth-child(even) { transform: rotate(1.4deg); }
+.snap:nth-child(3n) { transform: rotate(-0.5deg); }
+.snap__photo { display: block; width: 100%; aspect-ratio: 4 / 5; padding: 0; border: 0; background: var(--walnut-800); overflow: hidden; cursor: zoom-in; }
+.snap__photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+.snap__photo:hover img { transform: scale(1.04); }
+.snap figcaption { display: grid; gap: 2px; padding-top: 10px; text-align: center; }
+.snap__name { font-family: var(--font-script); font-size: 1.55rem; line-height: 1.1; color: var(--red-600); }
+.snap__note { font-family: var(--font-label); font-weight: 600; letter-spacing: 0.06em; font-size: 0.96rem; color: var(--ink-soft); }
+.snap--empty .snap__photo {
+  display: grid; place-items: center; cursor: default; background: var(--cream-200); border: 2px dashed var(--cream-400);
+  font-family: var(--font-label); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.9rem; color: var(--ink-soft);
+}
+.snap--empty .snap__name, .snap--empty .snap__note { opacity: 0.6; }
+.section-head .board__tag { color: var(--cream-200); border-color: var(--cream-200); }
+@media (max-width: 900px) { .wall { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 420px) { .wall { gap: 14px; } .snap { padding: 7px 7px 10px; } .snap__name { font-size: 1.3rem; } }
 
 .lightbox { padding: 0; border: 0; background: transparent; max-width: min(92vw, 900px); max-height: 94vh; overflow: visible; }
 .lightbox::backdrop { background: rgba(15, 10, 6, 0.9); }
@@ -664,7 +719,7 @@ a.visit__big:hover { color: var(--gold-300); }
 .site-footer { background: var(--walnut-950); border-top: 3px solid var(--gold-700); padding-block: clamp(36px, 6vw, 60px) 28px; }
 .footer__grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: clamp(22px, 4vw, 56px); align-items: start; }
 .footer__brand { display: grid; gap: 12px; justify-items: start; }
-.footer__brand img { height: 118px; width: auto; background: var(--cream-50); padding: 10px 16px; border-radius: 14px; border: 2px solid var(--gold-700); }
+.footer__brand img { height: 132px; width: auto; border-radius: 12px; border: 2px solid var(--gold-700); }
 .footer__col { display: grid; gap: 8px; }
 .footer__col h3 { font-family: var(--font-label); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; font-size: 0.95rem; color: var(--gold-300); }
 .footer__col a { text-decoration: none; }
@@ -739,9 +794,15 @@ a.visit__big:hover { color: var(--gold-300); }
 
 .item { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; }
 .item__name { font-weight: 600; font-size: 1.06rem; }
-.item__detail { color: var(--ink-soft); font-size: 0.94rem; }
+.item__what { min-width: 0; }
+.item__detail { color: var(--ink-soft); font-size: 0.94rem; margin-left: 4px; }
 .item__dots { flex: 1; min-width: 18px; border-bottom: 2px dotted var(--cream-400); transform: translateY(-4px); }
-.item__price { font-family: var(--font-label); font-weight: 700; font-size: 1.15rem; letter-spacing: 0.03em; color: var(--red-600); font-variant-numeric: tabular-nums; }
+.item__price { font-family: var(--font-label); font-weight: 700; font-size: 1.15rem; letter-spacing: 0.03em; color: var(--red-600); font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* A combo, size or add-on tucked under the item above it. */
+.item--sub { padding: 1px 0 5px 16px; margin-top: -3px; }
+.item--sub .item__name { font-weight: 500; font-size: 0.98rem; color: var(--ink-soft); }
+.item--sub .item__price { font-size: 1.04rem; }
+.menu-card__foot { color: var(--ink-soft); font-size: 0.94rem; margin-top: 10px; }
 
 .chips-label { font-family: var(--font-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.88rem; margin-top: 10px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
@@ -751,7 +812,7 @@ a.visit__big:hover { color: var(--gold-300); }
 
 .cocktail { padding: 8px 0; border-top: 1px dotted var(--cream-400); }
 .cocktail:first-of-type { border-top: 0; }
-.cocktail__name { font-weight: 600; font-size: 1.06rem; }
+.cocktail__name { font-weight: 600; font-size: 1.06rem; display: flex; align-items: baseline; gap: 8px; }
 .cocktail__tag { margin-left: 8px; font-family: var(--font-label); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.74rem; background: var(--gold-500); color: var(--walnut-950); padding: 2px 7px; border-radius: 4px; vertical-align: 2px; }
 .cocktail__detail { color: var(--ink-soft); font-size: 0.95rem; }
 .menu-foot { margin-top: 10px; color: var(--cream-200); font-size: 0.95rem; display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; justify-content: space-between; }
@@ -789,7 +850,7 @@ a.visit__big:hover { color: var(--gold-300); }
   .reveal { opacity: 1; transform: none; transition: none; }
   .btn, .tile img, .gallery img { transition: none; }
   .anthem__label { animation: none; }
-  .event-card__flyer img { transition: none; }
+  .event-card__flyer img, .snap__photo img, .brand, .brand img { transition: none; }
   .hero__slide { transition: none; }
   .hero__slide img, .hero__slide.is-panning img { animation: none; transform: none; }
 }

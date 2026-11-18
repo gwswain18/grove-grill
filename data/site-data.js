@@ -79,11 +79,12 @@ window.GROVE = {
 
   happyHour: {
     headline: "$2 domestic beers",
-    detail: "Bud Light, Busch Light, Michelob Ultra and Coors Light, poured cold.",
+    detail: "Bud Light, Busch Light, Michelob Ultra and Coors Light, poured cold. Imports are $3 and happy hour wings are $10.",
     when: "Ask at the bar for today's happy hour times."
   },
 
-  // Home page "crowd favorites". Add img: "images/your-photo.jpg" to any item to show a photo.
+  // Home page "crowd favorites". The first one gets the big card. Add img: "images/your-photo.jpg"
+  // to any item to show a photo. Prices here are typed separately from the menu below, so change both.
   favorites: [
     {
       name: "Ribs off the grill",
@@ -92,6 +93,14 @@ window.GROVE = {
       mentions: 63,
       img: "images/ribs-sliced.jpg",
       alt: "Sliced ribs glazed with barbecue sauce"
+    },
+    {
+      name: "Pork Steak",
+      blurb: "Off the grill and sauced, it's the regulars' other order. Have it on its own, as a plate with sides, or teamed up with ribs or chicken.",
+      price: "Single $14.99 · Plate with 2 sides $20.99",
+      tag: "Off the grill",
+      img: "images/pork-steak.jpg",
+      alt: "A sauced pork steak with toasted buns"
     },
     {
       name: "Shrimp Po' Boy",
@@ -104,7 +113,7 @@ window.GROVE = {
     {
       name: "Fried Catfish",
       blurb: "Two golden fillets with your pick of side and a drink. Add six shrimp if you came hungry.",
-      price: "$18.99 · with 6 shrimp $23.99",
+      price: "$18.99 · with 6 shrimp $23.00",
       mentions: 15,
       img: "images/catfish-fries.jpg",
       alt: "Golden fried catfish with fries"
@@ -112,7 +121,7 @@ window.GROVE = {
     {
       name: "Wings",
       blurb: "Six sauces, including our in-house Raspberry Heat.",
-      price: "5 for $9.99 · 10 for $19.99",
+      price: "5 for $9.99 · 10 for $15.99",
       tag: "House sauce",
       img: "images/wings-raspberry.jpg",
       alt: "Wings glazed in Raspberry Heat sauce"
@@ -201,7 +210,11 @@ window.GROVE = {
     }
   ],
 
-  // Food menu, from the menu the restaurant gave Google. CONFIRM PRICES WITH OWNER.
+  // Food menu. Prices are from the register's "Menu Item Detail" report of 17 Nov 2026.
+  // One line per item:   { name: "Item", detail: "optional small print", price: "12.99" }
+  // Add sub: true to tuck a line under the item above it (combos, sizes and add-ons).
+  // Optional per section: img + imgAlt (photo), note (line under the title), nav (short name
+  // for the row of section buttons), chips (a list of choices), footnote (small print).
   menu: [
     {
       id: "ribs",
@@ -210,11 +223,16 @@ window.GROVE = {
       title: "Ribs",
       note: "The reason most folks walk in the door.",
       items: [
-        { name: "4 Bone Ribs", price: "14.99" },
-        { name: "Half Rack", detail: "with 2 sides", price: "24.99" },
-        { name: "Full Rack", price: "31.99" },
-        { name: "Full Rack", detail: "with 2 sides", price: "37.99" },
-        { name: "Rib Sandwich Combo", detail: "1 side and a drink", price: "17.99" }
+        { name: "4-Bone Ribs", detail: "ribs only", price: "14.99" },
+        { sub: true, name: "Platter with 2 sides and a drink", price: "19.99" },
+        { sub: true, name: "With 1 piece of catfish and 1 side", price: "21.99" },
+        { name: "Half Rack", detail: "ribs only", price: "18.99" },
+        { sub: true, name: "With 2 sides", price: "24.99" },
+        { name: "Full Rack", detail: "ribs only", price: "31.99" },
+        { sub: true, name: "With 2 sides", price: "37.99" },
+        { name: "Fried Ribs", detail: "4 bones", price: "14.99" },
+        { sub: true, name: "With 1 side and a drink", price: "17.99" },
+        { name: "Rib Tips", detail: "with 1 side", price: "12.99" }
       ]
     },
     {
@@ -223,11 +241,28 @@ window.GROVE = {
       imgAlt: "Chicken leg quarter with mac and cheese and yellow rice",
       title: "BBQ Plates",
       items: [
-        { name: "Single Pork Steak", price: "12.99" },
-        { name: "Pork Steak Plate", detail: "with 1 side", price: "15.99" },
-        { name: "Pork Steak Plate", detail: "with 2 sides", price: "18.99" },
-        { name: "Pork Steak + 2 Rib Bones", price: "23.99" },
-        { name: "Pork Steak + Chicken Leg Quarter", price: "22.99" }
+        { name: "Pork Steak", detail: "single", price: "14.99" },
+        { sub: true, name: "Plate with 1 side", price: "17.99" },
+        { sub: true, name: "Plate with 2 sides", price: "20.99" },
+        { name: "Chicken Leg Quarter", detail: "single", price: "8.99" },
+        { sub: true, name: "Plate with 2 sides", price: "15.99" },
+        { name: "Pork Steak + 2 Rib Bones", detail: "2 sides and a drink", price: "24.99" },
+        { name: "Pork Steak + Chicken Leg Quarter", detail: "2 sides and a drink", price: "22.99" },
+        { name: "Chicken Leg Quarter + 2 Rib Bones", detail: "2 sides and a drink", price: "22.99" },
+        { name: "Pulled Pork by the Pound", price: "21.00" }
+      ]
+    },
+    {
+      id: "sandwiches",
+      title: "Sandwiches",
+      items: [
+        { name: "Rib Sandwich", price: "14.99" },
+        { sub: true, name: "Combo with 1 side and a drink", price: "17.99" },
+        { name: "Pork Steak Sandwich", detail: "with 1 side", price: "15.99" },
+        { name: "Pulled Pork Sandwich", price: "11.99" },
+        { sub: true, name: "With 1 side", price: "14.99" },
+        { name: "Pulled Chicken Sandwich", price: "10.99" },
+        { sub: true, name: "Combo with 1 side and a drink", price: "16.99" }
       ]
     },
     {
@@ -236,23 +271,39 @@ window.GROVE = {
       imgAlt: "Fried catfish and shrimp with onion rings",
       title: "Seafood",
       items: [
-        { name: "2 Catfish + 6 Shrimp", detail: "1 side and a drink", price: "23.99" },
         { name: "2 Catfish", detail: "1 side and a drink", price: "18.99" },
+        { name: "2 Catfish + 6 Shrimp", detail: "1 side and a drink", price: "23.00" },
+        { name: "Catfish + 4 Wings", detail: "1 side and a drink", price: "21.99" },
+        { name: "10 Fried Shrimp", detail: "1 side and a drink", price: "16.99" },
         { name: "Catfish Po' Boy", price: "14.99" },
-        { name: "Shrimp Po' Boy", price: "13.99" }
+        { sub: true, name: "With fries and a drink", price: "18.99" },
+        { sub: true, name: "With onion rings", price: "19.99" },
+        { name: "Shrimp Po' Boy", price: "13.99" },
+        { sub: true, name: "With fries and a drink", price: "17.99" },
+        { sub: true, name: "With onion rings", price: "18.99" },
+        { name: "Extra Catfish", detail: "1 piece", price: "8.99" },
+        { name: "Extra Shrimp", detail: "6", price: "8.99" }
       ]
     },
     {
       id: "wings",
       img: "images/wings-fries.jpg",
       imgAlt: "Sauced wings with seasoned fries",
-      title: "Wings",
+      title: "Wings & Chicken Strips",
+      nav: "Wings",
       items: [
         { name: "5 Wings", price: "9.99" },
-        { name: "10 Wings", price: "19.99" }
+        { sub: true, name: "All flats", price: "10.99" },
+        { name: "10 Wings", price: "15.99" },
+        { sub: true, name: "All flats", price: "16.99" },
+        { name: "3 Chicken Strips", price: "10.99" },
+        { sub: true, name: "Combo with fries and a drink", price: "15.99" },
+        { name: "5 Chicken Strips", price: "13.99" },
+        { sub: true, name: "Combo with fries and a drink", price: "18.99" }
       ],
       chipsLabel: "Pick your sauce",
-      chips: ["Hot Honey", "Barbecue", "Buffalo", "Garlic Parm", "Lemon Pepper", "Raspberry Heat"]
+      chips: ["Hot Honey", "Barbecue", "Buffalo", "Garlic Parm", "Lemon Pepper", "Raspberry Heat"],
+      footnote: "Extra Raspberry Heat sauce or blue cheese: 50¢ each."
     },
     {
       id: "burgers",
@@ -260,25 +311,29 @@ window.GROVE = {
       imgAlt: "Cheeseburger with lettuce, tomato and pickles",
       title: "Burgers",
       items: [
-        { name: "Standard Burger", detail: "two 4 oz patties", price: "12.99" },
+        { name: "Standard Double Burger", detail: "two 4 oz patties", price: "12.99" },
+        { sub: true, name: "Combo with fries and a drink", price: "16.99" },
+        { sub: true, name: "Combo with onion rings and a drink", price: "17.99" },
         { name: "Brisket Blend Burger", detail: "8 oz", price: "14.99" },
-        { name: "Monster Burger", detail: "two 8 oz patties", price: "18.99" }
+        { sub: true, name: "Combo with fries", price: "18.99" },
+        { sub: true, name: "Combo with onion rings", price: "19.99" },
+        { name: "Monster Burger", detail: "two 8 oz brisket blend patties", price: "18.99" },
+        { sub: true, name: "Combo with fries and a drink", price: "20.99" },
+        { sub: true, name: "Combo with onion rings and a drink", price: "21.99" }
       ]
     },
     {
-      id: "sandwiches",
-      title: "Sandwiches",
+      id: "starters",
+      img: "images/fried-pickles.jpg",
+      imgAlt: "Fried pickle spears",
+      title: "Starters",
       items: [
-        { name: "Rib Sandwich", price: "13.99" },
-        { name: "Make it a combo", detail: "1 side and a drink", price: "18.99" }
-      ]
-    },
-    {
-      id: "kids",
-      title: "Kids Meals",
-      items: [
-        { name: "2 Chicken Strips", price: "9.99" },
-        { name: "Kids Burger", price: "10.99" }
+        { name: "Fried Pickle Spears", detail: "5", price: "8.00" },
+        { name: "Mozzarella Sticks", detail: "6", price: "8.00" },
+        { name: "Empanadas", detail: "3", price: "12.00" },
+        { sub: true, name: "5 empanadas", price: "15.00" },
+        { name: "Basket of Fries", price: "5.99" },
+        { name: "Onion Rings Basket", price: "6.99" }
       ]
     },
     {
@@ -291,41 +346,75 @@ window.GROVE = {
         { name: "Macaroni & Cheese", price: "3.99" },
         { name: "Baked Beans", price: "3.99" },
         { name: "Yellow Rice", price: "3.99" },
-        { name: "Potato Salad", price: "3.55" },
-        { name: "Coleslaw", price: "3.50" },
+        { name: "Potato Salad", price: "3.50" },
         { name: "Fries", price: "3.25" },
-        { name: "Fry Basket", price: "5.99" },
-        { name: "Onion Rings", price: "3.50" },
-        { name: "Onion Rings Basket", price: "7.50" },
-        { name: "Mozzarella Sticks", price: "8.00" }
+        { name: "Onion Rings", price: "3.50" }
+      ]
+    },
+    {
+      id: "kids",
+      title: "Kids Meals",
+      nav: "Kids",
+      items: [
+        { name: "2 Chicken Strips", detail: "with fries and a drink", price: "9.99" },
+        { name: "Kids Burger", detail: "with fries and a drink", price: "10.99" }
+      ]
+    },
+    {
+      id: "sweets",
+      title: "Something Sweet",
+      nav: "Sweets",
+      items: [
+        { name: "Cheesecake", price: "7.49" },
+        { name: "Doughnut Holes", detail: "7, with cinnamon sugar and caramel sauce", price: "5.99" }
       ]
     },
     {
       id: "soft-drinks",
       title: "Drinks",
-      plain: ["Fountain drinks", "Sweet tea", "Lemonade", "Bottled water"]
+      items: [
+        { name: "Fountain Drink", detail: "small, 12 oz", price: "2.29" },
+        { sub: true, name: "Large", price: "2.99" },
+        { name: "Bottled Water", price: "2.00" }
+      ],
+      plain: ["Sweet tea", "Lemonade"]
     }
   ],
 
-  // Bar menu, from the restaurant's printed drink menu. No prices were listed there.
+  // Bar menu. The recipes are from the restaurant's printed drink menu; the prices are from the
+  // same register report as the food. A drink with no price was not on that report.
   bar: {
     cocktailImg: "images/cocktail.jpg",
     cocktailImgAlt: "A cocktail with a sugared rim, cherries and lime",
+    cocktailNote: "Mixed drinks $7 · top shelf $10.",
     beer: [
-      "Bud Light", "Busch Light", "Michelob Ultra", "Coors Light", "Modelo Especial",
-      "Corona Extra", "Voodoo Ranger Imperial IPA", "White Claw Blood Orange", "Straw-Ber-Rita"
+      { name: "Bud Light, Busch Light, Coors Light, Michelob Ultra", price: "3.75" },
+      { name: "Corona Extra, Modelo Especial", price: "4.75" },
+      { name: "New Belgium Voodoo Ranger IPA", price: "4.50" },
+      { name: "White Claw", price: "4.50" },
+      { name: "Straw-Ber-Rita", price: "3.00" },
+      { name: "Mang-O-Rita", price: "7.50" },
+      { name: "Carbliss", price: "6.00" },
+      { name: "Beer Bucket Special", price: "18.00" }
     ],
     cocktails: [
       { name: "Groverita", tag: "House favorite", detail: "Tequila, orange liqueur and lime juice with a salted rim." },
-      { name: "Rum Punch", detail: "Light and dark rum, orange and pineapple juice, grenadine, fresh lime." },
-      { name: "Lemon Drop", detail: "Vodka, fresh lemon juice, simple syrup and triple sec with a sugar rim." },
+      { name: "Rum Punch", price: "10.00", detail: "Light and dark rum, orange and pineapple juice, grenadine, fresh lime." },
+      { name: "Lemon Drop", price: "8.00", detail: "Vodka, fresh lemon juice, simple syrup and triple sec with a sugar rim." },
       { name: "Moscow Mule", detail: "Vodka, fresh lime juice and ginger beer." },
-      { name: "Cosmopolitan", detail: "Citrus vodka, triple sec, fresh lime and cranberry juice." },
+      { name: "Cosmopolitan", price: "10.00", detail: "Citrus vodka, triple sec, fresh lime and cranberry juice." },
       { name: "Whiskey Sour", detail: "Whiskey or bourbon, lemon juice and simple syrup." },
-      { name: "Tequila Sunrise", detail: "Tequila, orange juice and grenadine." },
-      { name: "Long Island Iced Tea", detail: "Vodka, white rum, silver tequila, gin, triple sec, lemon and a splash of cola." }
+      { name: "Tequila Sunrise", price: "8.00", detail: "Tequila, orange juice and grenadine." },
+      { name: "Long Island Iced Tea", price: "10.00", detail: "Vodka, white rum, silver tequila, gin, triple sec, lemon and a splash of cola." }
     ]
   },
+
+  // Wall of fame: well-known guests who stopped by. One line per photo, newest first.
+  // Put the photo in images/visitors/ and add, for example:
+  //   { img: "images/visitors/your-photo.jpg", name: "Who it is", note: "What folks know them for", when: "March 2027" },
+  // While this list is empty the section stays hidden (the draft shows empty sample frames instead).
+  // Only post a guest's photo with their OK.
+  visitors: [],
 
   gallery: [
     { src: "images/hero-smoker.jpg", alt: "Racks of ribs on the smoker", size: "wide" },

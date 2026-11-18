@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Yellowtail&display=swap" rel="stylesheet">
   <!-- Bump the ?v= number whenever the CSS or scripts change, so phones fetch the new copy. -->
-  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/styles.css?v=3">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -102,7 +102,7 @@
           <p class="label rule">Welcome to</p>
           <h2 class="title">The Grove</h2>
           <p class="lede">Oak Grove's spot for barbecue, burgers and po' boys, served by people who are glad you walked in.</p>
-          <p>On the grill: ribs, pork steaks and chicken leg quarters. From the fryer: catfish, shrimp and wings in six sauces. On the side: collard greens, mac and cheese, baked beans and yellow rice. Pull up a high-top, catch the game and stay a while.</p>
+          <p>“On the grill” falling off the bone ribs, pork steaks and chicken leg quarters. From the fryer: catfish, shrimp and wings in six sauces. On the side: collard greens, mac and cheese, baked beans and yellow rice. Pull up a high-top, catch the game and stay a while.</p>
           <p class="script">Come for the food, stay for the vibes.</p>
           <ul class="fact-row">
             <li class="fact">5.0 on Google</li>
@@ -173,7 +173,7 @@
           <!-- The anthem. Stays silent until someone presses play. -->
           <div class="anthem">
             <button type="button" class="anthem__disc" data-music aria-pressed="false" aria-label="Play The Grove Grill Anthem">
-              <span class="anthem__label"><img src="images/logo.webp" alt="" width="760" height="415" loading="lazy"></span>
+              <span class="anthem__label"><img src="images/logo-sign.jpg" alt="" width="877" height="569" loading="lazy"></span>
               <span class="anthem__btn" aria-hidden="true"></span>
             </button>
             <div class="anthem__info">
@@ -292,6 +292,20 @@
       </div>
     </section>
 
+    <!-- Wall of fame: built from "visitors" in data/site-data.js. Hidden until there is a photo
+         (while the site is a draft it shows empty sample frames instead). -->
+    <section class="section on-green" id="visitors" data-visitors-wrap hidden>
+      <div class="wrap">
+        <div class="section-head section-head--center reveal">
+          <p class="script">Look who stopped by</p>
+          <h2 class="title">The Grove wall of fame</h2>
+          <p class="lede">Familiar faces who pulled up a chair with us.</p>
+          <span class="board__tag" data-visitors-sample hidden>Sample layout · photos to come</span>
+        </div>
+        <div class="wall reveal" data-visitors></div>
+      </div>
+    </section>
+
     <!-- Gallery -->
     <section class="section wood" id="gallery">
       <div class="wrap">
@@ -333,7 +347,7 @@
 
   <div id="site-footer"></div>
 
-  <script src="data/site-data.js?v=2"></script>
-  <script src="js/site.js?v=2"></script>
+  <script src="data/site-data.js?v=3"></script>
+  <script src="js/site.js?v=3"></script>
 </body>
 </html>

@@ -93,7 +93,7 @@
       (G.draft ? '<div class="draft-ribbon">Preview draft for The Grove\'s review · not the live site yet</div>' : "") +
       '<header class="site-header"><div class="wrap site-header__bar">' +
         '<a class="brand" href="index.html" aria-label="' + esc(G.name) + ' home">' +
-          '<img src="images/logo.webp" alt="' + esc(G.name) + '" width="760" height="415"></a>' +
+          '<img src="images/logo-sign.jpg" alt="' + esc(G.name) + '" width="877" height="569"></a>' +
         '<nav class="nav" id="site-nav" aria-label="Main">' + navLinks + "</nav>" +
         '<div class="header-actions">' +
           (G.anthem && G.anthem.src
@@ -116,7 +116,7 @@
       '<footer class="site-footer"><div class="wrap">' +
         '<div class="footer__grid">' +
           '<div class="footer__brand">' +
-            '<img src="images/logo.webp" alt="' + esc(G.name) + '" width="760" height="415" loading="lazy">' +
+            '<img src="images/logo-sign.jpg" alt="' + esc(G.name) + '" width="877" height="569" loading="lazy">' +
             '<p class="script">Great food · Great flavor · Great times</p>' +
           "</div>" +
           '<div class="footer__col"><h3>Find us</h3>' +
@@ -130,7 +130,7 @@
           "</div>" +
         "</div>" +
         '<div class="footer__fine"><span>© ' + new Date().getFullYear() + " " + esc(G.name) + "</span>" +
-          (G.draft ? "<span>Preview draft. Hours, prices and offers still to be confirmed.</span>" : "") +
+          (G.draft ? "<span>Preview draft. Hours and offers still to be confirmed.</span>" : "") +
         "</div>" +
       "</div></footer>" +
 
@@ -150,7 +150,7 @@
         '<p class="form__fine" data-open-line></p>' +
       "</div></dialog>" +
 
-      '<dialog class="lightbox" id="flyer-box" aria-label="Event flyer">' +
+      '<dialog class="lightbox" id="flyer-box" aria-label="Full size photo">' +
         '<button type="button" class="lightbox__close" data-close-flyer>Close ✕</button>' +
         '<img alt="" data-flyer-img>' +
       "</dialog>";
@@ -329,6 +329,40 @@
       : '<p class="events__empty">New dates are on the way. Follow us on Instagram or join the VIP Club to hear first.</p>';
     pastBox.innerHTML = past.map(function (e) { return eventCard(e, true); }).join("");
     $$("[data-events-past-wrap]").forEach(function (el) { el.hidden = !past.length; });
+  }
+
+  /* ---------- Wall of fame: well-known guests ---------- */
+
+  function renderVisitors() {
+    var wrap = $("[data-visitors-wrap]");
+    var box = $("[data-visitors]");
+    if (!wrap || !box) return;
+
+    var list = G.visitors || [];
+    // With no photos yet, the draft shows empty frames so the owner can see the layout.
+    // The finished site hides the whole section until there is a photo to show.
+    var sample = !list.length && !!G.draft;
+    wrap.hidden = !list.length && !sample;
+    $$("[data-visitors-sample]", wrap).forEach(function (el) { el.hidden = !sample; });
+
+    if (sample) {
+      box.innerHTML = [1, 2, 3, 4].map(function () {
+        return '<figure class="snap snap--empty"><div class="snap__photo"><span>Guest photo</span></div>' +
+          '<figcaption><span class="snap__name">Guest name</span>' +
+          '<span class="snap__note">Who they are · when they came by</span></figcaption></figure>';
+      }).join("");
+      return;
+    }
+
+    box.innerHTML = list.map(function (v) {
+      var note = [v.note, v.when].filter(Boolean).join(" · ");
+      var alt = v.alt || (v.name ? v.name + " at The Grove" : "A guest at The Grove");
+      return '<figure class="snap">' +
+        '<button type="button" class="snap__photo" data-flyer="' + esc(v.img) + '" data-flyer-alt="' + esc(alt) +
+          '" aria-label="View full size: ' + esc(v.name || "guest photo") + '"><img src="' + esc(v.img) + '" alt="' + esc(alt) + '" loading="lazy"></button>' +
+        "<figcaption>" + (v.name ? '<span class="snap__name">' + esc(v.name) + "</span>" : "") +
+          (note ? '<span class="snap__note">' + esc(note) + "</span>" : "") + "</figcaption></figure>";
+    }).join("");
   }
 
   /* ---------- The anthem ---------- */
@@ -560,11 +594,12 @@
 
   /* ---------- Menu page ---------- */
 
+  // sub: true tucks a row under the item above it (combos, sizes, add-ons).
   function itemRow(it) {
-    return '<div class="item"><span class="item__name">' + esc(it.name) + "</span>" +
-      (it.detail ? '<span class="item__detail">' + esc(it.detail) + "</span>" : "") +
-      '<span class="item__dots" aria-hidden="true"></span>' +
-      '<span class="item__price">$' + esc(it.price) + "</span></div>";
+    return '<div class="item' + (it.sub ? " item--sub" : "") + '"><span class="item__what"><span class="item__name">' + esc(it.name) + "</span>" +
+      (it.detail ? ' <span class="item__detail">' + esc(it.detail) + "</span>" : "") + "</span>" +
+      (it.price ? '<span class="item__dots" aria-hidden="true"></span><span class="item__price">$' + esc(it.price) + "</span>" : "") +
+      "</div>";
   }
 
   function renderMenu() {
@@ -580,6 +615,7 @@
         body += '<p class="chips-label">' + esc(sec.chipsLabel || "") + "</p>" +
           '<ul class="chips">' + sec.chips.map(function (c) { return "<li>" + esc(c) + "</li>"; }).join("") + "</ul>";
       }
+      if (sec.footnote) body += '<p class="menu-card__foot">' + esc(sec.footnote) + "</p>";
       var photo = sec.img ? '<img class="menu-card__img" src="' + esc(sec.img) + '" alt="' + esc(sec.imgAlt || "") + '" loading="lazy">' : "";
       return '<section class="menu-card" id="' + esc(sec.id) + '"><div class="menu-card__head"><h2 class="menu-card__title">' +
         esc(sec.title) + "</h2></div>" + photo + '<div class="menu-card__body">' + body + "</div></section>";
@@ -589,22 +625,25 @@
     cards.push(
       '<section class="menu-card menu-card--bar" id="cocktails"><div class="menu-card__head"><h2 class="menu-card__title">Cocktails</h2></div>' +
       (bar.cocktailImg ? '<img class="menu-card__img" style="object-position:50% 38%" src="' + esc(bar.cocktailImg) + '" alt="' + esc(bar.cocktailImgAlt || "") + '" loading="lazy">' : "") +
-      '<div class="menu-card__body">' + bar.cocktails.map(function (c) {
-        return '<div class="cocktail"><p class="cocktail__name">' + esc(c.name) +
-          (c.tag ? '<span class="cocktail__tag">' + esc(c.tag) + "</span>" : "") + "</p>" +
+      '<div class="menu-card__body">' +
+      (bar.cocktailNote ? '<p class="menu-card__note">' + esc(bar.cocktailNote) + "</p>" : "") +
+      bar.cocktails.map(function (c) {
+        return '<div class="cocktail"><p class="cocktail__name"><span>' + esc(c.name) +
+          (c.tag ? '<span class="cocktail__tag">' + esc(c.tag) + "</span>" : "") + "</span>" +
+          (c.price ? '<span class="item__dots" aria-hidden="true"></span><span class="item__price">$' + esc(c.price) + "</span>" : "") + "</p>" +
           '<p class="cocktail__detail">' + esc(c.detail) + "</p></div>";
       }).join("") + "</div></section>"
     );
     cards.push(
       '<section class="menu-card menu-card--bar" id="beer"><div class="menu-card__head"><h2 class="menu-card__title">Beer &amp; Seltzers</h2></div>' +
       '<div class="menu-card__body"><p class="menu-card__note">' + esc(G.happyHour.headline) + " at happy hour.</p>" +
-      '<ul class="chips">' + bar.beer.map(function (b) { return "<li>" + esc(b) + "</li>"; }).join("") + "</ul></div></section>"
+      bar.beer.map(itemRow).join("") + "</div></section>"
     );
     grid.innerHTML = cards.join("");
 
     var nav = $("[data-menu-nav]");
     if (nav) {
-      var links = G.menu.map(function (s) { return { id: s.id, title: s.title }; })
+      var links = G.menu.map(function (s) { return { id: s.id, title: s.nav || s.title }; })
         .concat([{ id: "cocktails", title: "Cocktails" }, { id: "beer", title: "Beer" }]);
       nav.innerHTML = links.map(function (l) { return '<li><a href="#' + l.id + '">' + esc(l.title) + "</a></li>"; }).join("");
     }
@@ -684,6 +723,7 @@
     fillFacts();
     renderHome();
     renderEvents();
+    renderVisitors();
     heroSlideshow();
     renderMenu();
     markCurrent();
